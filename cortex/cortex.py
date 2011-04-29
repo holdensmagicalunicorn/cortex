@@ -8,6 +8,9 @@ from django.http import HttpResponse
 import logging
 logger = logging.getLogger(__name__)
 
+class callback_dict(dict):
+    def __setitem__(self, key, value):
+        self.setdefault(key, []).append(value)
 
 class SessionPool:
 
@@ -132,11 +135,25 @@ app_fixture = {
     'id': 1
 }
 
+
 class WebsocketHandler:
 
     def __init__(self, pool=None, models=None):
         self.pool = pool
         self.models = models
+
+    @staticmethod
+    def on_connet(user, socket):
+        pass
+
+    def on_disconnet(user, socket):
+        pass
+
+    def on_message(msg, socket):
+        pass
+
+    def on_set(self, model, attr, val):
+        pass
 
     def delegate(self, event, args, socket):
         """
@@ -148,11 +165,14 @@ class WebsocketHandler:
             # Authorization key
             # (identical to request.session.session_key)
             key = args['cookie']
+            user_type, user_obj = manual_auth(key)
 
             socket.send({
               'event': 'initial',
               'app': app_fixture
             });
+
+            self.on_connect(user_obj, socket)
 
         elif event == 'sync':
 
@@ -182,6 +202,8 @@ class WebsocketHandler:
 
             inst.save()
 
+        else:
+            self.__dict__['on_' + event](args, socket)
 
     def make_handle(self):
 
@@ -192,7 +214,8 @@ class WebsocketHandler:
                 message = socketio.recv()
 
                 try:
-                    logger.info('SOCKET CONNECTED: %s' % socketio.session.session_id)
+                    logger.info('SOCKET CONNECTED: %s' %
+                            socketio.session.session_id)
                     if len(message) == 1:
                         # JSON decoded version of the message
                         msg = message[0]
@@ -210,7 +233,8 @@ class WebsocketHandler:
                         self.delegate(msg['event'], msg, socketio)
                     else:
                         if not socketio.connected():
-                            logger.info('SOCKET DISCONNETED: %s' % socketio.session.session_id)
+                            logger.info('SOCKET DISCONNETED: %s' %
+                                    socketio.session.session_id)
                             self.pool.remove(socketio.session)
                         elif message:
                             # Something strange was set
