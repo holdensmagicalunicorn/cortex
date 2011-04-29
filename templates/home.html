@@ -1,0 +1,26 @@
+<html>
+    <head>
+        <title>Django + ZeroMQ + Gevent - Chat Room</title>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+        <script src="/static/underscore-min.js"></script>
+        <script src="/static/backbone-min.js"></script>
+        <script src="/static/capsule.models.js"></script>
+        <script src="/static/capsule.views.js"></script>
+        <script src="/static/socket.io.js"></script>
+        <script src="/static/client.js"></script>
+    </head>
+    <body>
+
+    <h1> {{ room_name }} </h1>
+
+    <form id="sender">
+    <input id="msgfield"></input>
+    <input type="submit" value="Send"/>
+    </form>
+
+    <script type="text/javascript">
+        var session_key = "{{session_key}}";
+    </script>
+    </body>
+</html>
