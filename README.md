@@ -1,9 +1,11 @@
-Cortex is a Django extension desgiend to (hopefully) make
+Cortex is a Django extension designed to (hopefully) make
 realtime Django painless.
 
-The goal is to establish a one-to-one correspondance between
+The goal is to establish a one-to-one correspondence between
 Backbone.js models and Django models and allow changes to be
 synced between client and server in realtime.
+
+Everything is a work in progress at the moment.
 
 Directions:
 ===========
