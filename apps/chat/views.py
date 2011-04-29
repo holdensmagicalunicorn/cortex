@@ -4,26 +4,33 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
 from django.template import RequestContext
-from chat.models import AppModel
+from django.contrib.auth.decorators import login_required
 
 import logging
 logger = logging.getLogger(__name__)
 
+from chat.models import AppModel
 from cortex import SessionPool
 Sessions = SessionPool();
 
-from django.contrib.auth.decorators import login_required
-
+# Establish a correspondance between the `.type` attribute
+# attached to Backbone models and their counterpart in the
+# Django ORM.
 CapsuleModels = {
     'AppModel': AppModel
 }
 
+# The initial `app` model created upon a `session` event call.
 app_fixture = {
-     'attributes': {
+    'attributes': {
         'toggler': False,
     },
     'id': 1
 }
+
+# ----------
+# HTTP Views
+# ----------
 
 def home(request, room_name=None, template_name='home.html'):
     context = {'session_key':request.session.session_key}
@@ -40,6 +47,10 @@ def users(request):
         users += "(%s,%s)" % (user_type, user_obj.username)
 
     return HttpResponse(users,mimetype='text')
+
+# ---------------
+# Socket Handlers
+# ---------------
 
 def handle_event(event, args, socket):
     """
@@ -84,8 +95,6 @@ def handle_event(event, args, socket):
             setattr(inst,key,value)
 
         inst.save()
-
-# SocketIO Handler
 
 @login_required
 def socketio(request):
