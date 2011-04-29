@@ -1,1 +1,1 @@
-from cortex import SessionPool, Channel
+from cortex import SessionPool, Channel, WebsocketHandler

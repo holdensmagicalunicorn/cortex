@@ -1,11 +1,17 @@
 $(function () {
 
+  // Connected Users
+  var Client = Capsule.Model.extend({
+  });
+
+  // Collection of Connected Users
+  var ClientList = Capsule.Collection.extend({
+      model: Client
+  });
+
   var AppModel = Capsule.Model.extend({
     type: 'app',
     initialize: function (spec) {
-      //this.register();
-      //this.addChildCollection('members', Members);
-      //this.addChildModel('activityLog', ActivityLogPage);
     }
   });
 
@@ -22,7 +28,6 @@ $(function () {
 
   window.socket = new io.Socket( document.location.hostname );
 
-  // get and send our session cookie (yes, i know httponly cookies would be more secure, but whatever it's demo)
   socket.on('connect', function() {
     socket.send({
         event: 'session',
@@ -39,11 +44,11 @@ $(function () {
     console.log('RECD:', data);
 
     switch (data.event) {
-      case 'templates':
-        for (template in data.templates) {
-          ich.addTemplate(template, data.templates[template]);
-        }
-        break;
+      //case 'templates':
+        //for (template in data.templates) {
+          //ich.addTemplate(template, data.templates[template]);
+        //}
+        //break;
       case 'initial':
         //import app state
         app.mport(data.app);

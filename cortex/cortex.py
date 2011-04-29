@@ -1,8 +1,13 @@
+import sys, traceback
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
-from collections import deque
+from django.http import HttpResponse
+
+import logging
+logger = logging.getLogger(__name__)
+
 
 class SessionPool:
 
@@ -97,7 +102,10 @@ class Channel:
     def subscribers(self):
         return self._subscribers
 
-    def on_subscribe(self):
+    def on_subscribe(self, user):
+        pass
+
+    def on_unsubscribe(self, user):
         pass
 
 class Everyone(Channel):
@@ -115,6 +123,111 @@ class Everyone(Channel):
 
     def subscribers(self):
         return iter(self._pool)
+
+# The initial `app` model created upon a `session` event call.
+app_fixture = {
+    'attributes': {
+        'toggler': False,
+    },
+    'id': 1
+}
+
+class WebsocketHandler:
+
+    def __init__(self, pool=None, models=None):
+        self.pool = pool
+        self.models = models
+
+    def delegate(self, event, args, socket):
+        """
+        Process realtime events based on the `event` attribute
+        passed.
+        """
+
+        if event == 'session':
+            # Authorization key
+            # (identical to request.session.session_key)
+            key = args['cookie']
+
+            socket.send({
+              'event': 'initial',
+              'app': app_fixture
+            });
+
+        elif event == 'sync':
+
+            model = args['model']
+            attrs = model['attrs']
+            sid   = model['id']
+            cid   = model['cid']
+            typ   = args['type']
+
+            inst = self.models[typ].objects.get(id=sid)
+
+            for key, value in attrs.iteritems():
+                setattr(inst,key,value)
+
+            inst.save()
+
+        elif event == 'set':
+
+            changes = args['change']
+            sid     = args['id']
+            typ     = args['type']
+
+            inst = self.models[typ].objects.get(id=sid)
+
+            for key, value in changes.iteritems():
+                setattr(inst,key,value)
+
+            inst.save()
+
+
+    def make_handle(self):
+
+        def handler(request):
+            socketio = request.environ['socketio']
+
+            while True:
+                message = socketio.recv()
+
+                try:
+                    logger.info('SOCKET CONNECTED: %s' % socketio.session.session_id)
+                    if len(message) == 1:
+                        # JSON decoded version of the message
+                        msg = message[0]
+                        session = socketio.session
+
+                        # If this session is an initial connect then add
+                        # to the SessionPool instance
+                        if session.is_new():
+                            # Add a key attribute to each new
+                            # gevent.socketio.Session object
+                            key = request.session.session_key
+                            session.key = key
+                            self.pool.add(session)
+
+                        self.delegate(msg['event'], msg, socketio)
+                    else:
+                        if not socketio.connected():
+                            logger.info('SOCKET DISCONNETED: %s' % socketio.session.session_id)
+                            self.pool.remove(socketio.session)
+                        elif message:
+                            # Something strange was set
+                            logger.error('Unknown socket message: %s' % message)
+                            print message
+
+                except Exception:
+                    if settings.DEBUG:
+                        exc_type, exc_value, exc_traceback = sys.exc_info()
+                        traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                                      limit=2, file=sys.stdout)
+                    else:
+                        print 'Error occured while processing Socket.IO event'
+
+            return HttpResponse()
+
+        return handler
 
 def manual_auth(session_key):
     """
