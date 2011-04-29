@@ -29,20 +29,8 @@ Point your browser to localhost:8080
 Credits:
 ========
 
-Capsule
-
-HenrikJoreteg
-https://github.com/andyet/Capsule
-
-backbone.js, underscore.js
-
-Jeremy Ashkenas
-https://github.com/jashkenas
-
-gevent-socketio
-
-Jeffrey Gellens
-https://bitbucket.org/Jeffrey/gevent-socketio
-
+* Capsule - HenrikJoreteg ( https://github.com/andyet/Capsule )
+* backbone, underscore - Jeremy Ashkenas ( https://github.com/jashkenas )
+* gevent-socketio - Jeffrey Gellens (https://bitbucket.org/Jeffrey/gevent-socketio)
 
 And yes, the name is Firefly reference. Can't stop the signal.
