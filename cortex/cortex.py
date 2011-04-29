@@ -116,7 +116,6 @@ class Everyone(Channel):
     def subscribers(self):
         return iter(self._pool)
 
-
 def manual_auth(session_key):
     """
     Manually lookup user accounts by corresponding their session

@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from chat.models import AppModel
-from cortex import SessionPool
+from cortex import SessionPool, Channel
 Sessions = SessionPool();
 
 # Establish a correspondance between the `.type` attribute
@@ -27,6 +27,8 @@ app_fixture = {
     },
     'id': 1
 }
+
+Chatroom = Channel(SessionPool)
 
 # ----------
 # HTTP Views

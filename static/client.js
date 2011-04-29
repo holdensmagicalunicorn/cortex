@@ -11,7 +11,7 @@ $(function () {
 
   var AppView = Capsule.View.extend({
   });
-  
+
 
   // init our empty AppModel
   var app = window.app = new AppModel(),
@@ -23,17 +23,17 @@ $(function () {
   window.socket = new io.Socket( document.location.hostname );
 
   // get and send our session cookie (yes, i know httponly cookies would be more secure, but whatever it's demo)
-  socket.on('connect', function() { 
+  socket.on('connect', function() {
     socket.send({
-        event: 'session', 
-        cookie: window.session_key 
+        event: 'session',
+        cookie: window.session_key
     });
     console.log('connected');
   });
 
   window.socket.connect();
 
-  socket.on('message', function (data) { 
+  socket.on('message', function (data) {
     var changedModel, template;
 
     console.log('RECD:', data);
