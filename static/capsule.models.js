@@ -301,10 +301,6 @@ THE SOFTWARE.
     // Generates an `id` if on server and sets it in our reference hash.
     register: function () {
       var self = this;
-      if (server) {
-        var id = uuid();
-        this.id = id;
-      }
       if (this.id && !Capsule.models[this.id]) Capsule.models[this.id] = this;
     },
 

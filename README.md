@@ -33,4 +33,7 @@ Credits:
 * backbone, underscore - Jeremy Ashkenas ( https://github.com/jashkenas )
 * gevent-socketio - Jeffrey Gelens ( https://bitbucket.org/Jeffrey/gevent-socketio )
 
+Capsule is modified from the original, the server side code is
+stripped.
+
 And yes, the name is Firefly reference. Can't stop the signal.
