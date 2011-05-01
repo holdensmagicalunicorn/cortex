@@ -40,29 +40,8 @@ THE SOFTWARE.
       Capsule = this.Capsule || (this.Capsule = {});
     }
 
-  // #Capsule.View
   // Adding some conveniences to the Backbone view.
   Capsule.View = Backbone.View.extend({
-    // ###handleBindings
-    // This makes it simple to bind model attributes to the view.
-    // To use it, add a `classBindings` and/or a `contentBindings` attribute
-    // to your view and call `this.handleBindings()` at the end of your view's 
-    // `render` function. It's also used by `basicRender` which lets you do 
-    // a complete attribute-bound views with just this:
-    //
-    //     var ProfileView = Capsule.View.extend({
-    //       template: 'profile',
-    //       contentBindings: {
-    //         'name': '.name'
-    //       },
-    //       classBindings: {
-    //         'active': '' 
-    //       },
-    //       render: function () {
-    //         this.basicRender();
-    //         return this;
-    //       }
-    //     });
     handleBindings: function () {
       var self = this;
       if (this.contentBindings) {

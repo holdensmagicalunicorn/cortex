@@ -1,4 +1,5 @@
 import sys, traceback
+import simplejson as json
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.contrib.auth.models import AnonymousUser
@@ -94,22 +95,29 @@ class Channel:
 
     def __init__(self,pool):
         self._pool = pool
-        self._subscribers = []
+        self._subscribers = set([])
         #self.messages = []
 
-    def send(self, msg):
-        for session in self._subscribers:
-            session.put_client_msg(msg)
+    def send(self, msg_dict):
+
+        message = {
+          'event': 'message',
+          'message': msg_dict
+        }
+
+        for subscriber in self._subscribers:
+            subscriber.put_client_msg(message)
             #self.message.append(msg)
 
     def subscribers(self):
         return self._subscribers
 
-    def on_subscribe(self, user):
-        pass
+    def add_subscriber(self, socket):
+        self._subscribers.add(socket.session)
 
-    def on_unsubscribe(self, user):
-        pass
+    def del_subscriber(self, socket):
+        if socket in self._subscribers:
+            self._subscribers.discard(socket.session)
 
 class Everyone(Channel):
     """
@@ -135,7 +143,6 @@ app_fixture = {
     'id': 1
 }
 
-
 class WebsocketHandler:
 
     def __init__(self, pool=None, models=None):
@@ -146,33 +153,33 @@ class WebsocketHandler:
     def on_connet(user, socket):
         pass
 
-    def on_disconnet(user, socket):
+    @staticmethod
+    def on_disconnect(user, socket):
         pass
 
-    def on_message(msg, socket):
+    @staticmethod
+    def on_message(msg, user, socket):
         pass
 
     def on_set(self, model, attr, val):
         pass
 
-    def delegate(self, event, args, socket):
+    def delegate(self, event, args, user, socket):
         """
         Process realtime events based on the `event` attribute
         passed.
         """
 
         if event == 'session':
-            # Authorization key
-            # (identical to request.session.session_key)
-            key = args['cookie']
-            user_type, user_obj = manual_auth(key)
-
             socket.send({
               'event': 'initial',
               'app': app_fixture
             });
 
-            self.on_connect(user_obj, socket)
+            self.on_connect(user, socket)
+
+        elif event == 'disconnect':
+            self.on_disconnect(user, socket)
 
         elif event == 'sync':
 
@@ -187,6 +194,7 @@ class WebsocketHandler:
             for key, value in attrs.iteritems():
                 setattr(inst,key,value)
 
+            # TODO: check if the user has rights to do this
             inst.save()
 
         elif event == 'set':
@@ -202,6 +210,10 @@ class WebsocketHandler:
 
             inst.save()
 
+        elif event == 'message':
+            msg = args['message']
+            self.on_message(msg, user, socket)
+
         else:
             self.__dict__['on_' + event](args, socket)
 
@@ -209,6 +221,8 @@ class WebsocketHandler:
 
         def handler(request):
             socketio = request.environ['socketio']
+            session = socketio.session
+            user = request.user
 
             while True:
                 message = socketio.recv()
@@ -219,7 +233,6 @@ class WebsocketHandler:
                     if len(message) == 1:
                         # JSON decoded version of the message
                         msg = message[0]
-                        session = socketio.session
 
                         # If this session is an initial connect then add
                         # to the SessionPool instance
@@ -230,12 +243,16 @@ class WebsocketHandler:
                             session.key = key
                             self.pool.add(session)
 
-                        self.delegate(msg['event'], msg, socketio)
+                        self.delegate(msg['event'], msg, user, socketio)
                     else:
                         if not socketio.connected():
                             logger.info('SOCKET DISCONNETED: %s' %
                                     socketio.session.session_id)
                             self.pool.remove(socketio.session)
+
+                            # Execute disconnect callback
+                            args = {'cookie': request.session.session_key}
+                            self.delegate('disconnect', args, user, socketio)
                         elif message:
                             # Something strange was set
                             logger.error('Unknown socket message: %s' % message)

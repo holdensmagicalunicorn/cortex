@@ -14,18 +14,18 @@ CapsuleModels = {
     'AppModel': AppModel,
 }
 
-
 class Chatroom(Channel):
 
     def subscribe(self, user, socket):
-        pass
+        self.add_subscriber(socket)
+        self.send('User %s connected.' % user.username)
 
-    def unsubscribe(self, args, socket):
-        pass
+    def unsubscribe(self, user, socket):
+        self.del_subscriber(socket)
+        self.send('User %s disconnected.' % user.username)
 
-    def message(self, args, socket):
-        pass
-
+    def message(self, msg, user, socket):
+        self.send(msg)
 
 # ----------
 # HTTP Views
@@ -57,7 +57,7 @@ Websocket = WebsocketHandler(pool=Sessions,
                              models=CapsuleModels)
 
 Websocket.on_connect    = Room.subscribe
-Websocket.on_disconncet = Room.unsubscribe
+Websocket.on_disconnect = Room.unsubscribe
 Websocket.on_message    = Room.message
 
 # Hook that is passed to urls.py to handle socketio events
