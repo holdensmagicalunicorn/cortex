@@ -32,7 +32,4 @@ class CapsuleModel(models.Model):
 class AppModel(CapsuleModel):
     toggler = models.BooleanField()
 
-class Client(CapsuleModel):
-    username = models.TextField()
-
 admin.site.register(AppModel)

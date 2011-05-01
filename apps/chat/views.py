@@ -11,28 +11,64 @@ Sessions = SessionPool();
 # attached to Backbone models and their counterpart in the
 # Django ORM.
 CapsuleModels = {
-    'AppModel': AppModel,
+    'AppModel': AppModel
+}
+
+# The initial `app` model created upon a `session` event call.
+app = {
+    'type': 'AppModel',
+    'attributes': {
+        'toggler': False,
+    },
+    'id': 1
 }
 
 class Chatroom(Channel):
 
     name = 'chatroom'
+    users = set([])
+
+    def userlist(self):
+        userlst = ''
+        for user in self.users:
+            userlst += user.username + '\n'
+        return userlst
 
     def subscribe(self, user, socket):
+        # Add a socket subscription to this channel
         self.add_subscriber(socket)
+
+        # Add a user to users set
+        self.users.add(user)
+
+        # Push the new userlist to all clients
+        self.call(app,'userlist',self.userlist())
+
+        # Send a message that a new user is connected
         self.send('Server: User %s connected.' % user.username)
 
     def unsubscribe(self, user, socket):
+        # Remove socket subscription
         self.del_subscriber(socket)
+
+        # Remove the user
+        self.users.discard(user.username)
+
+        # Push the new userlist to all clients
+        self.call(app,'userlist',self.userlist())
+
+        # Send a message that the user disconnected
         self.send('Server: User %s disconnected.' % user.username)
 
     def message(self, msg, user, socket):
+        # Publish a chat message on this channel
         self.send("%s: %s" % (user.username,msg))
 
 # ----------
 # HTTP Views
 # ----------
 
+@login_required
 def home(request, room_name=None, template_name='home.html'):
     context = {'session_key':request.session.session_key}
 
@@ -57,6 +93,7 @@ Room = Chatroom(Sessions)
 
 Websocket = WebsocketHandler(pool=Sessions,
                              models=CapsuleModels)
+Websocket.app_fixture = app
 
 Websocket.on_connect    = Room.subscribe
 Websocket.on_disconnect = Room.unsubscribe

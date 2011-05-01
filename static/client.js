@@ -1,30 +1,25 @@
 $(function () {
 
-  // Connected Users
-  var Client = Capsule.Model.extend({
-  });
-
-  // Collection of Connected Users
-  var ClientList = Capsule.Collection.extend({
-      model: Client
-  });
-
   var AppModel = Capsule.Model.extend({
-    type: 'app',
+
+    type: 'AppModel',
+    users: {},
+
     initialize: function (spec) {
-    }
+    },
+
+    userlist: function(user) {
+        $("#users").text(user);
+    },
+
   });
 
   var AppView = Capsule.View.extend({
   });
 
-
   // init our empty AppModel
   var app = window.app = new AppModel(),
-    view = window.view = {},
-    server;
-
-  app.type = 'AppModel';
+      view = window.view = {};
 
   window.socket = new io.Socket( document.location.hostname );
 
@@ -70,6 +65,17 @@ $(function () {
           console.error('model not found for change event', data);
         }
         break;
+
+      case 'call':
+        var model = Capsule.models[data.id];
+        if(model) {
+            var procedure = model[data.procedure];
+            procedure.call(model, data.args);
+        } else {
+          console.error('model not found for procedure call', data);
+        }
+        break;
+
       case 'add':
         Capsule.models[data.collection].add(data.data.attrs);
         break;

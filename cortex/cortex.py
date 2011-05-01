@@ -1,10 +1,10 @@
 import sys, traceback
-import simplejson as json
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
 from django.http import HttpResponse
+from django.db import models
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,14 +12,6 @@ logger = logging.getLogger(__name__)
 class callback_dict(dict):
     def __setitem__(self, key, value):
         self.setdefault(key, []).append(value)
-
-# The initial `app` model created upon a `session` event call.
-app_fixture = {
-    'attributes': {
-        'toggler': False,
-    },
-    'id': 1
-}
 
 class SessionPool:
 
@@ -38,14 +30,16 @@ class SessionPool:
         """
         Remove a Socket.IO session from the pool.
         """
-        del self._pool[session.session_id]
+        if session.session_id in self._pool:
+            del self._pool[session.session_id]
 
     def remove_key(self, session_key):
         """
         Remove a Socket.IO session from the pool by key
         sessio key lookup.
         """
-        del self._pool[session_key]
+        if session_key in self:
+            del self._pool[session_key]
 
     def __iter__(self):
         """
@@ -117,6 +111,18 @@ class Channel:
             subscriber.put_client_msg(message)
             #self.message.append(msg)
 
+    def call(self, model, procedure, args):
+        message = {
+          'event'     : 'call',
+          'model'     : model['type'],
+          'id'        : model['id'],
+          'procedure' : procedure,
+          'args'      : args
+        }
+
+        for subscriber in self._subscribers:
+            subscriber.put_client_msg(message)
+
     def subscribers(self):
         return self._subscribers
 
@@ -145,6 +151,7 @@ class Everyone(Channel):
         return iter(self._pool)
 
 class WebsocketHandler:
+    app_fixture = {}
 
     def __init__(self, pool=None, models=None):
         self.pool = pool
@@ -172,10 +179,12 @@ class WebsocketHandler:
         """
 
         if event == 'session':
-            socket.send({
-              'event': 'initial',
-              'app': app_fixture
-            });
+
+            if self.app_fixture:
+                socket.send({
+                  'event': 'initial',
+                  'app': self.app_fixture
+                });
 
             self.on_connect(user, socket)
 
@@ -260,6 +269,9 @@ class WebsocketHandler:
                             print message
 
                 except Exception:
+                    # Catch all exceptions since we don't want to
+                    # break out of the loop, but print the
+                    # traceback out to the console
                     if settings.DEBUG:
                         exc_type, exc_value, exc_traceback = sys.exc_info()
                         traceback.print_exception(exc_type, exc_value, exc_traceback,
