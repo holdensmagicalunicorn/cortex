@@ -13,6 +13,14 @@ class callback_dict(dict):
     def __setitem__(self, key, value):
         self.setdefault(key, []).append(value)
 
+# The initial `app` model created upon a `session` event call.
+app_fixture = {
+    'attributes': {
+        'toggler': False,
+    },
+    'id': 1
+}
+
 class SessionPool:
 
     def __init__(self):
@@ -113,7 +121,8 @@ class Channel:
         return self._subscribers
 
     def add_subscriber(self, socket):
-        self._subscribers.add(socket.session)
+        if socket not in self._subscribers:
+            self._subscribers.add(socket.session)
 
     def del_subscriber(self, socket):
         if socket in self._subscribers:
@@ -134,14 +143,6 @@ class Everyone(Channel):
 
     def subscribers(self):
         return iter(self._pool)
-
-# The initial `app` model created upon a `session` event call.
-app_fixture = {
-    'attributes': {
-        'toggler': False,
-    },
-    'id': 1
-}
 
 class WebsocketHandler:
 

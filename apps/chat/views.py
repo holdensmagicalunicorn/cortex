@@ -16,16 +16,18 @@ CapsuleModels = {
 
 class Chatroom(Channel):
 
+    name = 'chatroom'
+
     def subscribe(self, user, socket):
         self.add_subscriber(socket)
-        self.send('User %s connected.' % user.username)
+        self.send('Server: User %s connected.' % user.username)
 
     def unsubscribe(self, user, socket):
         self.del_subscriber(socket)
-        self.send('User %s disconnected.' % user.username)
+        self.send('Server: User %s disconnected.' % user.username)
 
     def message(self, msg, user, socket):
-        self.send(msg)
+        self.send("%s: %s" % (user.username,msg))
 
 # ----------
 # HTTP Views
