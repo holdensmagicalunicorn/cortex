@@ -5,7 +5,8 @@ The goal is to establish a one-to-one correspondence between
 Backbone.js models and Django models and allow changes to be
 synced between client and server in realtime.
 
-Everything is a work in progress at the moment.
+Most of the ideas are inspired by Now.js ( http://nowjs.com ) but
+translated into Pythonic API.
 
 Directions:
 ===========
@@ -36,4 +37,4 @@ Credits:
 Capsule is modified from the original, the server side code is
 stripped.
 
-And yes, the name is Firefly reference. Can't stop the signal.
+And yes, the name is Firefly reference.

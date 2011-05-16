@@ -1,8 +1,13 @@
 from django.conf.urls.defaults import patterns, include, url
 
-from chat.views import (
+#from chat.views import (
+#        home,
+#        users,
+#        socketio
+#)
+
+from drag.views import (
         home,
-        users,
         socketio
 )
 
@@ -32,11 +37,11 @@ urlpatterns = patterns('',
         include(admin.site.urls)
     ),
 
-    url(
-        r'^users/',
-        view=users,
-        name='users'
-    ),
+#    url(
+#        r'^users/',
+#        view=users,
+#        name='users'
+#    ),
 )
 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns

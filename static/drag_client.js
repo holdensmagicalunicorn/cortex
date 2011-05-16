@@ -21,7 +21,6 @@ $(function () {
   var app = window.app = new AppModel(),
       view = window.view = {};
 
-  // init our socket
   window.socket = new io.Socket( document.location.hostname );
 
   socket.on('connect', function() {
@@ -40,6 +39,11 @@ $(function () {
     console.log('RECD:', data);
 
     switch (data.event) {
+      //case 'templates':
+        //for (template in data.templates) {
+          //ich.addTemplate(template, data.templates[template]);
+        //}
+        //break;
       case 'initial':
         //import app state
         app.mport(data.app);
@@ -72,6 +76,15 @@ $(function () {
         }
         break;
 
+      case 'add':
+        Capsule.models[data.collection].add(data.data.attrs);
+        break;
+      case 'remove':
+        changedModel = Capsule.models[data.id];
+        if (changedModel && changedModel.collection) {
+          changedModel.collection.remove(changedModel);
+        }
+        break;
     }
   });
 });

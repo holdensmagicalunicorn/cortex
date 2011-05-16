@@ -129,7 +129,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'cortex',
-    'chat',
+    #'chat',
+    'drag',
 )
 
 # A sample logging configuration. The only tangible logging

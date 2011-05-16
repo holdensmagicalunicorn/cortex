@@ -1,0 +1,57 @@
+<html>
+    <head>
+        <title>Django + ZeroMQ + Gevent - Drag Example</title>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+        <script src="/static/jquery-ui.drag.js"></script>
+        <script src="/static/underscore-min.js"></script>
+        <script src="/static/backbone-min.js"></script>
+        <script src="/static/capsule.models.js"></script>
+        <script src="/static/capsule.views.js"></script>
+        <script src="/static/socket.io.js"></script>
+        <script src="/static/drag_client.js"></script>
+    </head>
+    <style>
+
+        #ball {
+            display: block;
+            width: 150px;
+            height: 150px;
+            background: #7491AB;
+            -moz-border-radius: 90px;
+            -webkit-border-radius: 90px;
+        }
+
+    </style>
+    <body>
+
+    <div id="ball"></div>
+
+    <script type="text/javascript">
+        var session_key = "{{session_key}}";
+
+        $(document).ready(function() {
+
+            $("#ball").draggable({
+                drag: function(e, ui) {
+
+                    window.socket.send({
+                        event: 'message',
+                        message: ui.position
+                    });
+                }
+            });
+
+            // Avoid multiple DOM lookups by declaring this
+            var ball = $("#ball");
+                   
+            window.socket.on('message', function (data) {
+                if(data.event == "message") {
+                    ball.css(data.message);
+                }
+            });
+
+        });
+    </script>
+    </body>
+</html>
