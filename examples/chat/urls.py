@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import patterns, include, url
+from django.views.generic.simple import redirect_to
 
 from chat.views import (
         home,
@@ -32,11 +33,13 @@ urlpatterns = patterns('',
         include(admin.site.urls)
     ),
 
-    url(
-        r'^users/',
-        view=users,
-        name='users'
-    ),
+    #url(
+    #    r'^users/',
+    #    view=users,
+    #    name='users'
+    #),
+
+   ('^users/login/$', redirect_to, {'url': '/admin'})
 )
 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns

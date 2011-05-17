@@ -1,6 +1,8 @@
+import sys
 import os
 
 PROJECT_ROOT = os.path.dirname(__file__)
+#sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps"))
 
 LOGIN_URL = '/users/login/'
 
@@ -129,7 +131,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'cortex',
-    #'chat',
     'drag',
 )
 
