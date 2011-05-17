@@ -21,11 +21,18 @@ Install neccesary packages:
 
     $ pip install -r requirements.txt 
 
-Run:
-    
-    $ python run.py
+To test one of the example apps follow the directions in 
 
-Point your browser to localhost:8080
+    examples/drag/README
+    examples/chat/README
+
+Use
+===
+
+Use pip to Install the `requirements.txt` in your Django project's 
+virtualenv then place the directory cortex in your Django project's 
+path. Copy all javascript source files from `static/` to your static 
+directory.  You can then `import cortex`.
 
 Credits:
 ========
