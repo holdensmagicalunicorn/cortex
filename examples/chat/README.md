@@ -7,16 +7,17 @@ user system for chat handles.
 Directions:
 ===========
 
-* Using the virtualenv via ../../requirement.txt launch.
+Using the virtualenv via ../../requirement.txt launch.
 
     $ python manage.py syncdb
 
-* Create your admin account. And run the server
+Create your admin account. And run the server
 
     $ python run.py
 
-* Login at http://localhost:8080/users/login
-* Test the chat room at http://localhost:8080
+Login at http://localhost:8080/users/login
+
+Test the chat room at http://localhost:8080
 
 Notes
 =====
