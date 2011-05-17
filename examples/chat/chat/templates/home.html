@@ -1,0 +1,77 @@
+<html>
+    <head>
+        <title>Django + ZeroMQ + Gevent - Chat Room</title>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+        <script src="/static/underscore-min.js"></script>
+        <script src="/static/backbone-min.js"></script>
+        <script src="/static/capsule.models.js"></script>
+        <script src="/static/capsule.views.js"></script>
+        <script src="/static/socket.io.js"></script>
+        <script src="/static/client.js"></script>
+    </head>
+    <style>
+        #chat_form {
+            position: absolute;
+            bottom: 0;
+
+        }
+
+        #chat_message {
+            width: 80%;
+            font-size: 22pt;
+            font-family: Monaco;
+
+            padding: 0px;
+            margin: 0px;
+            border: 1px solid black;
+        }
+
+        #users {
+            overflow: pre;
+            float: right;
+            width: 200px;
+            height: 100%;
+            border: 1px solid black;
+            text-align: center;
+            font-size: 22pt;
+            font-family: Monaco;
+        }
+    </style>
+    <body>
+
+    <div id="users">
+
+    </div>
+    <div id="message_spool">
+    </div>
+
+    <form id="chat_form">
+        <input id="chat_message" type="text"></input>
+        <button type="submit">Send</button>
+    </form>
+
+    <script type="text/javascript">
+        var session_key = "{{session_key}}";
+
+        $('#chat_form').submit(function() {
+            window.socket.send({
+                event: 'message',
+                message: $('#chat_message').val()
+            });
+            $('#chat_message').val('').focus();
+            return false;
+        });
+
+        $(document).ready(function() {
+
+            window.socket.on('message', function (data) {
+                if(data.event == "message") {
+                    $("#message_spool").append(data.message + "<br/>");
+                }
+            });
+
+        });
+    </script>
+    </body>
+</html>
