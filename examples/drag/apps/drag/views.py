@@ -25,14 +25,8 @@ app = {
 
 class Dragger(Channel):
 
-    name = 'chatroom'
+    name = 'dragger'
     users = set([])
-
-    def userlist(self):
-        userlst = ''
-        for user in self.users:
-            userlst += user.username + '\n'
-        return userlst
 
     def subscribe(self, user, socket):
         # Add a socket subscription to this channel
@@ -41,9 +35,6 @@ class Dragger(Channel):
         # Add a user to users set
         self.users.add(user)
 
-        # Send a message that a new user is connected
-        self.send('Server: User %s connected.' % user.username)
-
     def unsubscribe(self, user, socket):
         # Remove socket subscription
         self.del_subscriber(socket)
@@ -51,11 +42,8 @@ class Dragger(Channel):
         # Remove the user
         self.users.discard(user.username)
 
-        # Send a message that the user disconnected
-        self.send('Server: User %s disconnected.' % user.username)
-
     def message(self, msg, user, socket):
-        # Publish a chat message on this channel
+        # Publish the new (x,y) coordinates
         self.send(msg)
 
 # ----------
