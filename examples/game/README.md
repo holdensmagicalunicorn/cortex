@@ -1,4 +1,4 @@
-Multiplyaer Game Example
+Multiplayer Game Example
 ========================
 
 This is a demo of using Cortex with Canvas and Coffeecript.
