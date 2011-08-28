@@ -17,7 +17,7 @@ Build your virtualenv:
     $ virtualenv --no-site-packages env
     $ source env/bin/activate
 
-Install neccesary packages:
+Install necessary packages:
 
     $ pip install -r requirements.txt 
 
